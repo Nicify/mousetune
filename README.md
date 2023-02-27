@@ -10,7 +10,7 @@ A cli tool for setting system-wide mouse sensitivity and acceleration on macOS.
 mset [sensitivity] [acceleration]
 ```
 
-Example:
+## Example
 
 ```bash
 # Set sensitivity to 190 and disable acceleration.

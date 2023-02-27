@@ -18,7 +18,7 @@ mset [-s <sensitivity>] [-a <acceleration>]
 ```bash
 mset                  # set sensitivity to 190 and disable acceleration
 mset -s 180           # set sensitivity to 180 and disable acceleration
-mset -s 100 -a 50000 # set sensitivity to 100 and acceleration to 50000
+mset -s 100 -a 50000  # set sensitivity to 100 and acceleration to 50000
 ```
 
 ## Build from source
@@ -56,4 +56,4 @@ sudo make uninstall
 
 ## License
 
-This project is licensed under [MIT License](LICENSE).
+This project is licensed on the [MIT License](LICENSE).

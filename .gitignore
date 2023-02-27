@@ -53,3 +53,5 @@ dkms.conf
 
 /build
 /mset
+*.zip
+*.tar.gz

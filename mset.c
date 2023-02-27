@@ -1,3 +1,5 @@
+#define VERSION "0.1.0"
+
 #include "mset.h"
 
 #include <CoreFoundation/CoreFoundation.h>
@@ -16,7 +18,6 @@ typedef struct {
   uint32_t acc;
 } m_config;
 
-const char *version = "0.1.0";
 const CFStringRef K_POINTER_RES_KEY = CFSTR(kIOHIDPointerResolutionKey);
 const CFStringRef K_MOUSE_ACCEL_KEY = CFSTR(kIOHIDMouseAccelerationType);
 
@@ -30,7 +31,8 @@ uint32_t res_to_sen(uint32_t res) {
 
 void usage(char *bin) {
   printf(
-    "Usage: %s [-s <sensitivity>] [-a <acceleration>]\n\nExamples:\n%s\t\t\t# set sensitivity to 190 and disable acceleration\n%s -s 180\t\t# set sensitivity to 180 and disable acceleration\n%s -s 100 -a 800000 # set sensitivity to 100 and acceleration to 800000\n",
+    "mset version %s\n\nUsage: %s [-s <sensitivity>] [-a <acceleration>]\n\nOptions:\n-s \t\t\t - set mouse sensitivity, default is 190, range is 1-199\n-a\t\t\t - set mouse acceleration, default is 0, range is 0-10000000, 0 means disable acceleration\n\nExamples:\n%s\t\t\t # set sensitivity to 190 and disable acceleration\n%s -s 180\t\t # set sensitivity to 180 and disable acceleration\n%s -s 100 -a 50000\t # set sensitivity to 100 and acceleration to 50000\n",
+    VERSION,
     bin,
     bin,
     bin,
@@ -81,7 +83,7 @@ int main(int argc, char **argv) {
   if (argc == 2) {
     char *arg = argv[1];
     if (strcmp(arg, "-v") == 0) {
-      printf("mset version %s", version);
+      printf("%s\n", VERSION);
       return 0;
     }
 

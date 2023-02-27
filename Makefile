@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -fmodules -std=c11 -O3 -framework IOKit -framework CoreFoundation
+CFLAGS = -fmodules -O3 -framework IOKit -framework CoreFoundation
 
 DESTDIR =
 prefix = /usr/local

@@ -1,3 +1,5 @@
+#include "mset.h"
+
 #include <CoreFoundation/CoreFoundation.h>
 #include <IOKit/IOKitLib.h>
 #include <IOKit/hidsystem/IOHIDLib.h>
@@ -6,6 +8,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 #include <unistd.h>
 
 typedef struct {
@@ -13,14 +16,28 @@ typedef struct {
   uint32_t acc;
 } m_config;
 
+const char *version = "0.1.0";
+const CFStringRef K_POINTER_RES_KEY = CFSTR(kIOHIDPointerResolutionKey);
+const CFStringRef K_MOUSE_ACCEL_KEY = CFSTR(kIOHIDMouseAccelerationType);
+
 uint32_t sen_to_res(uint32_t sen) {
-  return (2000 - (sen * 10)) * 65536;
+  return clamp(2000 - (sen * 10), 10, 1990) * 65536;
+}
+
+uint32_t res_to_sen(uint32_t res) {
+  return clamp((2000 - (res / 65536)) / 10, 1, 199);
+}
+
+void usage(char *bin) {
+  printf(
+    "Usage: %s [-s <sensitivity>] [-a <acceleration>]\n\nExamples:\n%s\t\t\t# set sensitivity to 190 and disable acceleration\n%s -s 180\t\t# set sensitivity to 180 and disable acceleration\n%s -s 100 -a 800000 # set sensitivity to 100 and acceleration to 800000\n",
+    bin,
+    bin,
+    bin,
+    bin);
 }
 
 m_config get() {
-  CFStringRef kMouseAccelKey = CFSTR(kIOHIDMouseAccelerationType);
-  CFStringRef kPointerResKey = CFSTR(kIOHIDPointerResolutionKey);
-
   NXEventHandle hdl = NXOpenEventStatus();
 
   uint32_t res = 0;
@@ -29,8 +46,8 @@ m_config get() {
   IOByteCount resByteSize = sizeof(res);
   IOByteCount accByteSize = sizeof(acc);
 
-  assert(KERN_SUCCESS == IOHIDGetParameter(hdl, kPointerResKey, (IOByteCount)sizeof(res), &res, &resByteSize));
-  assert(KERN_SUCCESS == IOHIDGetParameter(hdl, kMouseAccelKey, (IOByteCount)sizeof(acc), &acc, &accByteSize));
+  IOHIDGetParameter(hdl, K_POINTER_RES_KEY, (IOByteCount)sizeof(res), &res, &resByteSize);
+  IOHIDGetParameter(hdl, K_MOUSE_ACCEL_KEY, (IOByteCount)sizeof(acc), &acc, &accByteSize);
 
   NXCloseEventStatus(hdl);
 
@@ -40,13 +57,10 @@ m_config get() {
 }
 
 int set(m_config cfg) {
-  CFStringRef kMouseAccelKey = CFSTR(kIOHIDMouseAccelerationType);
-  CFStringRef kPointerResKey = CFSTR(kIOHIDPointerResolutionKey);
-
   NXEventHandle hdl = NXOpenEventStatus();
 
-  assert(KERN_SUCCESS == IOHIDSetParameter(hdl, kPointerResKey, &cfg.res, sizeof(cfg.res)));
-  assert(KERN_SUCCESS == IOHIDSetParameter(hdl, kMouseAccelKey, &cfg.acc, sizeof(cfg.acc)));
+  assert(KERN_SUCCESS == IOHIDSetParameter(hdl, K_POINTER_RES_KEY, &cfg.res, sizeof(cfg.res)));
+  assert(KERN_SUCCESS == IOHIDSetParameter(hdl, K_MOUSE_ACCEL_KEY, &cfg.acc, sizeof(cfg.acc)));
 
   NXCloseEventStatus(hdl);
 
@@ -54,38 +68,72 @@ int set(m_config cfg) {
 }
 
 int main(int argc, char **argv) {
+  char *bin = argv[0];
   uint32_t sen = 190;
   uint32_t acc = 0;
   uint32_t res = sen_to_res(sen);
   m_config cfg = {res, acc};
+  uint32_t idx = 0;
 
-  if (argc == 1) {
-    return set(cfg);
-  }
+  bool quiet = false;
+  bool has_invalid_arg = false;
 
-  if (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "--help") == 0) {
-    printf(
-      "A cli tool for setting system-wide mouse sensitivity and acceleration on macOS.\n\nUsage:\n mset [sensitivity] [acceleration]\n\nExample:\n\n# Set sensitivity to 190 and disable acceleration. \nmset 190 0\n\n# Set sensitivity to 100 and acceleration to 30000. \nmset 100 30000\n");
+  if (argc == 2) {
+    char *arg = argv[1];
+    if (strcmp(arg, "-v") == 0) {
+      printf("mset version %s", version);
+      return 0;
+    }
+
+    usage(bin);
     return 0;
   }
 
-  if (argc == 2) {
-    sen = atoi(argv[1]);
-
-    assert(sen >= 1 && sen <= 199);
-    cfg.res = sen_to_res(sen);
-    return set(cfg);
+  for (idx = 1; idx < argc; idx++) {
+    if (argv[idx][0] != '-') {
+      has_invalid_arg = true;
+      break;
+    }
+    switch (argv[idx][1]) {
+      case 's':
+        sen = atoi(argv[++idx]);
+        assert(sen >= 1 && sen <= 199);
+        res = sen_to_res(sen);
+        cfg.res = res;
+        break;
+      case 'a':
+        acc = atoi(argv[++idx]);
+        assert(acc >= 0 && acc <= 10000000);
+        cfg.acc = acc;
+        break;
+      case 'q':
+        quiet = true;
+        break;
+      default:
+        has_invalid_arg = true;
+        break;
+    }
   }
 
-  if (argc == 3) {
-    sen = atoi(argv[1]);
-    acc = atoi(argv[2]);
-    assert(sen >= 1 && sen <= 199);
-    assert(acc >= 0 && acc <= 10000000);
-    cfg.res = sen_to_res(sen);
-    cfg.acc = acc;
-    return set(cfg);
+  if (has_invalid_arg) {
+    printf("Invalid argument: %s\n\n", argv[idx]);
+    usage(bin);
+    return 1;
   }
 
-  return 1;
+  m_config curr = get();
+
+  if (!quiet) {
+    printf("prev: sen=%d acc=%d\n", res_to_sen(curr.res), curr.acc);
+  }
+
+  set(cfg);
+
+  curr = get();
+
+  if (!quiet) {
+    printf("curr: sen=%d acc=%d\n", res_to_sen(curr.res), curr.acc);
+  }
+
+  return 0;
 }

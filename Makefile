@@ -1,7 +1,7 @@
 CC = clang
 CFLAGS = -fmodules -O3
 
-VERSION = 0.1.1
+VERSION = 0.1.2
 DESTDIR =
 prefix = /usr/local
 bindir = $(prefix)/bin
@@ -33,10 +33,10 @@ install: build
 uninstall:
 	$(RM) $(DESTDIR)$(bindir)/mset
 
-release: build
+release: clean build test
 	zip -r mset-$(VERSION)-universal.zip mset LICENSE README.md
 
-test: build
+test:
 	./mset
 	./mset -v
 	./mset -h

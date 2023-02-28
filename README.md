@@ -10,8 +10,10 @@ mset [-s <sensitivity>] [-a <acceleration>]
 
 ## Options
 
-- `-s <sensitivity>`: set mouse sensitivity, default is 190, range is 1-199
-- `-a <acceleration>`: set mouse acceleration, default is 0, range is 0-10000000, 0 means disable acceleration
+- `-s <sensitivity>`: Set mouse sensitivity, default is 190, range is 1-199
+- `-a <acceleration>`: Set mouse acceleration, default is 0, range is 0-10000000, 0 means disable acceleration
+- `-d`: Run as daemon, will check and re-apply mouse settings if system settings are changed or affected by other programs
+- `-h`: Show help
 
 ## Example
 

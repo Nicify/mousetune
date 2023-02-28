@@ -1,5 +1,3 @@
-#define VERSION "0.1.1"
-
 #include "mset.h"
 
 #include <CoreFoundation/CoreFoundation.h>
@@ -14,52 +12,50 @@
 #include <unistd.h>
 
 typedef struct {
-  UInt32 res;
-  UInt32 acc;
-} m_config;
+  uint32_t HIDPointerResolution;
+  uint32_t HIDMouseAcceleration;
+} HIDMouseParameters;
 
 typedef struct {
-  UInt32 sen;
-  UInt32 acc;
-  bool quiet;
+  uint32_t sen;
+  uint32_t acc;
+  bool daemon;
   bool has_invalid_args;
 } input_args;
 
 const CFStringRef K_POINTER_RES_KEY = CFSTR(kIOHIDPointerResolutionKey);
 const CFStringRef K_MOUSE_ACCEL_KEY = CFSTR(kIOHIDMouseAccelerationType);
 
-UInt32 sen_to_res(UInt32 sen) {
+uint32_t sen_to_res(uint32_t sen) {
   return clamp(2000 - (sen * 10), 10, 1990) * 65536;
 }
 
-UInt32 res_to_sen(UInt32 res) {
+uint32_t res_to_sen(uint32_t res) {
   return clamp((2000 - (res / 65536)) / 10, 1, 199);
 }
 
-static m_config get() {
+static HIDMouseParameters get() {
   NXEventHandle hdl = NXOpenEventStatus();
 
-  UInt32 res = 0;
-  UInt32 acc = 0;
+  uint32_t HIDPointerResolution = 0;
+  uint32_t HIDMouseAcceleration = 0;
 
-  IOByteCount resByteSize = sizeof(res);
-  IOByteCount accByteSize = sizeof(acc);
+  IOByteCount resByteSize = sizeof(HIDPointerResolution);
+  IOByteCount accByteSize = sizeof(HIDMouseAcceleration);
 
-  IOHIDGetParameter(hdl, K_POINTER_RES_KEY, (IOByteCount)sizeof(res), &res, &resByteSize);
-  IOHIDGetParameter(hdl, K_MOUSE_ACCEL_KEY, (IOByteCount)sizeof(acc), &acc, &accByteSize);
+  IOHIDGetParameter(hdl, K_POINTER_RES_KEY, (IOByteCount)sizeof(HIDPointerResolution), &HIDPointerResolution, &resByteSize);
+  IOHIDGetParameter(hdl, K_MOUSE_ACCEL_KEY, (IOByteCount)sizeof(HIDMouseAcceleration), &HIDMouseAcceleration, &accByteSize);
 
   NXCloseEventStatus(hdl);
 
-  m_config cfg = {res, acc};
-
-  return cfg;
+  return (HIDMouseParameters){HIDPointerResolution, HIDMouseAcceleration};
 }
 
-static int set(m_config cfg) {
+static int set(HIDMouseParameters parameters) {
   NXEventHandle hdl = NXOpenEventStatus();
 
-  assert(KERN_SUCCESS == IOHIDSetParameter(hdl, K_POINTER_RES_KEY, &cfg.res, sizeof(cfg.res)));
-  assert(KERN_SUCCESS == IOHIDSetParameter(hdl, K_MOUSE_ACCEL_KEY, &cfg.acc, sizeof(cfg.acc)));
+  assert(KERN_SUCCESS == IOHIDSetParameter(hdl, K_POINTER_RES_KEY, &parameters.HIDPointerResolution, sizeof(parameters.HIDPointerResolution)));
+  assert(KERN_SUCCESS == IOHIDSetParameter(hdl, K_MOUSE_ACCEL_KEY, &parameters.HIDMouseAcceleration, sizeof(parameters.HIDMouseAcceleration)));
 
   NXCloseEventStatus(hdl);
 
@@ -67,12 +63,14 @@ static int set(m_config cfg) {
 }
 
 static void print_usage(char *bin) {
-  // One printf per line to make it easier to read and maintain
   printf("mset version %s\n\n", VERSION);
   printf("Usage: %s [-s <sensitivity>] [-a <acceleration>]\n\n", bin);
   printf("Options:\n");
   printf("-s\t\t\t - set mouse sensitivity, default is 190, range is 1-199\n");
   printf("-a\t\t\t - set mouse acceleration, default is 0, range is 0-10000000, 0 means disable acceleration\n\n");
+  printf("-d\t\t\t - run as daemon, will check and re-apply mouse settings if system settings are changed or affected by other programs\n");
+  printf("-v\t\t\t - print version\n");
+  printf("-h, --help\t\t - print this help\n\n");
   printf("Examples:\n");
   printf("%s\t\t\t # set sensitivity to 190 and disable acceleration\n", bin);
   printf("%s -s 180\t\t # set sensitivity to 180 and disable acceleration\n", bin);
@@ -106,46 +104,64 @@ static input_args parse_args(int argc, char **argv) {
   input_args args = {190, 0, false, false};
 
   for (int idx = 1; idx < argc; idx++) {
-    if (strcmp(argv[idx], "-s") == 0) {
-      args.sen = atoi(argv[++idx]);
-      assert(args.sen >= 1 && args.sen <= 199);
-    } else if (strcmp(argv[idx], "-a") == 0) {
-      args.acc = atoi(argv[++idx]);
-      assert(args.acc >= 0 && args.acc <= 10000000);
-    } else if (strcmp(argv[idx], "-q") == 0) {
-      args.quiet = true;
-    } else {
-      printf("Invalid argument: %s\n\n", argv[idx]);
-      print_usage(argv[0]);
-      exit(1);
-    }
+    char *key = argv[idx];
+    char *val = argv[++idx];
+    // clang-format off
+    strcmp(key, "-s") == 0 ? (args.sen = atoi(val), assert(args.sen >= 1 && args.sen <= 199)) :
+    strcmp(key, "-a") == 0 ? (args.acc = atoi(val), assert(args.acc >= 0 && args.acc <= 10000000)) :
+    strcmp(key, "-d") == 0 ? args.daemon = true :
+    (printf("Invalid argument: %s\n\n", argv[idx]), print_usage(argv[0]), exit(1));
+    // clang-format on
   }
 
   return args;
 }
 
-int main(int argc, char **argv) {
-  if (argc < 3) {
-    exit(print_meta(argc, argv));
+int apply(uint32_t sen, uint32_t acc, bool check, bool verbose) {
+  HIDMouseParameters cfg = {sen_to_res(sen), acc};
+
+  HIDMouseParameters curr = get();
+
+  if (verbose) {
+    printf("prev: sen=%d acc=%d\n", res_to_sen(curr.HIDPointerResolution), curr.HIDMouseAcceleration);
   }
 
-  input_args args = parse_args(argc, argv);
-  m_config cfg = {sen_to_res(args.sen), args.acc};
-
-  bool quiet = args.quiet;
-
-  m_config curr = get();
-
-  if (!quiet) {
-    printf("prev: sen=%d acc=%d\n", res_to_sen(curr.res), curr.acc);
+  if (check && curr.HIDPointerResolution == cfg.HIDPointerResolution && curr.HIDMouseAcceleration == cfg.HIDMouseAcceleration) {
+    printf("No change, skip\n");
+    return 0;
   }
 
   set(cfg);
 
   curr = get();
 
-  if (!quiet) {
-    printf("curr: sen=%d acc=%d\n", res_to_sen(curr.res), curr.acc);
+  if (verbose) {
+    printf("curr: sen=%d acc=%d\n", res_to_sen(curr.HIDPointerResolution), curr.HIDMouseAcceleration);
+  }
+
+  return 0;
+}
+
+int main(int argc, char **argv) {
+  if (argc == 1) {
+    return apply(190, 0, false, false);
+  }
+
+  if (argc < 3) {
+    exit(print_meta(argc, argv));
+  }
+
+  input_args args = parse_args(argc, argv);
+
+  apply(args.sen, args.acc, false, false);
+
+  if (args.daemon) {
+    while (true) {
+      // sleep for 15 seconds
+      usleep(15 * 1000 * 1000);
+
+      apply(args.sen, args.acc, true, false);
+    }
   }
 
   return 0;

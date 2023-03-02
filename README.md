@@ -2,6 +2,12 @@
 
 A cli tool for setting system-wide mouse sensitivity and acceleration on macOS.
 
+## Features
+
+- Set mouse sensitivity and acceleration system-wide
+- No accessibility permission required
+- No take over mouse input events, compatible with other mouse control tools
+
 ## Usage
 
 ```bash
@@ -34,7 +40,7 @@ Dev dependencies:
 Install dependencies:
 
 ```bash
-xcode-select --install # or brew install llvm
+xcode-select --install
 
 brew install make
 ```
@@ -58,6 +64,8 @@ sudo make uninstall
 ```
 
 ### Run at startup
+
+MouseTune can be configured to run at startup using launchd. The following commands can be used to add or remove MouseTune from launchd:
 
 #### Add to launchd
 

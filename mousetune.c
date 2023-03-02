@@ -9,7 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define VERSION "0.2.0"
+#define VERSION "1.0.0"
 
 #define clamp(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 
@@ -65,7 +65,7 @@ static int set(HIDMouseParameters parameters) {
 }
 
 static void print_usage(char *bin) {
-  printf("mset version %s\n\n", VERSION);
+  printf("mousetune version %s\n\n", VERSION);
   printf("Usage: %s [-s <sensitivity>] [-a <acceleration>]\n\n", bin);
   printf("Options:\n");
   printf("-s\t\t\t - set mouse sensitivity, default is 190, range is 1-199\n");
@@ -93,12 +93,12 @@ static int print_meta(int argc, char **argv) {
   }
 
   if (strcmp(cmd, "-h") == 0 || strcmp(cmd, "--help") == 0) {
-    print_usage("mset");
+    print_usage("mousetune");
     return 0;
   }
 
   printf("Invalid argument: %s\n\n", cmd);
-  print_usage("mset");
+  print_usage("mousetune");
   return 1;
 }
 

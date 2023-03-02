@@ -52,6 +52,6 @@ Mkfile.old
 dkms.conf
 
 /build
-/mset
+/mousetune
 *.zip
 *.tar.gz

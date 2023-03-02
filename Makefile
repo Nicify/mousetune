@@ -1,7 +1,7 @@
 CC = clang
 CFLAGS = -fmodules -O3
 
-VERSION = 0.2.0
+VERSION = 1.0.0
 DESTDIR =
 prefix = /usr/local
 bindir = $(prefix)/bin
@@ -11,46 +11,46 @@ INSTALL_PROGRAM = $(INSTALL) -m 755
 all: build
 
 build_x86_64:
-	$(CC) $(CFLAGS) -arch x86_64 -o mset.x86_64 mset.c
+	$(CC) $(CFLAGS) -arch x86_64 -o mousetune.x86_64 mousetune.c
 
 build_arm64:
-	$(CC) $(CFLAGS) -arch arm64 -o mset.arm64 mset.c
+	$(CC) $(CFLAGS) -arch arm64 -o mousetune.arm64 mousetune.c
 
 build: build_x86_64 build_arm64
-	lipo -create -output mset mset.x86_64 mset.arm64
-	rm mset.x86_64 mset.arm64
+	lipo -create -output mousetune mousetune.x86_64 mousetune.arm64
+	rm mousetune.x86_64 mousetune.arm64
 
 format:
 	clang-format -i *.c
 
 clean:
-	$(RM) mset
-	$(RM) mset-$(VERSION)-universal.zip
+	$(RM) mousetune
+	$(RM) mousetune-$(VERSION)-universal.zip
 
 install: build
-	$(INSTALL_PROGRAM) mset $(DESTDIR)$(bindir)/mset
+	$(INSTALL_PROGRAM) mousetune $(DESTDIR)$(bindir)/mousetune
 
 uninstall:
-	$(RM) $(DESTDIR)$(bindir)/mset
+	$(RM) $(DESTDIR)$(bindir)/mousetune
 
 # add launch service
-add-launchd:
-	cp mset.plist ~/Library/LaunchAgents/com.relicx-me.mset.plist
-	launchctl load ~/Library/LaunchAgents/com.relicx-me.mset.plist
+launchd-add:
+	cp mousetune.plist ~/Library/LaunchAgents/com.relicx-me.mousetune.plist
+	launchctl load ~/Library/LaunchAgents/com.relicx-me.mousetune.plist
 
 # remove launch service
-remove-launchd:
-	launchctl unload ~/Library/LaunchAgents/com.relicx-me.mset.plist
-	$(RM) ~/Library/LaunchAgents/com.relicx-me.mset.plist
+launchd-remove:
+	launchctl unload ~/Library/LaunchAgents/com.relicx-me.mousetune.plist
+	$(RM) ~/Library/LaunchAgents/com.relicx-me.mousetune.plist
 
 release: clean build test
-	zip -r mset-$(VERSION)-universal.zip mset mset.plist LICENSE README.md
+	zip -r mousetune-$(VERSION)-universal.zip mousetune mousetune.plist LICENSE README.md
 
 test:
-	./mset
-	./mset -v
-	./mset -h
-	./mset -s 100
-	./mset -s 120 -a 500000
-	./mset -a 0
-	./mset -s 190 -a 0
+	./mousetune
+	./mousetune -v
+	./mousetune -h
+	./mousetune -s 100
+	./mousetune -s 120 -a 500000
+	./mousetune -a 0
+	./mousetune -s 190 -a 0

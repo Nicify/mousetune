@@ -1,11 +1,11 @@
-# mset
+# MouseTune
 
 A cli tool for setting system-wide mouse sensitivity and acceleration on macOS.
 
 ## Usage
 
 ```bash
-mset [-s <sensitivity>] [-a <acceleration>]
+mousetune [-s <sensitivity>] [-a <acceleration>]
 ```
 
 ## Options
@@ -18,9 +18,9 @@ mset [-s <sensitivity>] [-a <acceleration>]
 ## Example
 
 ```bash
-mset                  # set sensitivity to 190 and disable acceleration
-mset -s 180           # set sensitivity to 180 and disable acceleration
-mset -s 100 -a 50000  # set sensitivity to 100 and acceleration to 50000
+mousetune                  # set sensitivity to 190 and disable acceleration
+mousetune -s 180           # set sensitivity to 180 and disable acceleration
+mousetune -s 100 -a 50000  # set sensitivity to 100 and acceleration to 50000
 ```
 
 ## Build from source

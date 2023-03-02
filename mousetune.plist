@@ -3,12 +3,12 @@
 <plist version="1.0">
 	<dict>
 		<key>Label</key>
-		<string>com.relicx-me.mset</string>
+		<string>com.relicx-me.mousetune</string>
 		<key>Program</key>
-		<string>/usr/local/bin/mset</string>
+		<string>/usr/local/bin/mousetune</string>
 		<key>ProgramArguments</key>
 		<array>
-			<string>/usr/local/bin/mset</string>
+			<string>/usr/local/bin/mousetune</string>
 			<string>-s</string>
 			<string>190</string>
 			<string>-a</string>

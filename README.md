@@ -57,6 +57,20 @@ sudo make install
 sudo make uninstall
 ```
 
+### Run at startup
+
+#### Add to launchd
+
+```bash
+make launchd-add
+```
+
+#### Remove from launchd
+
+```bash
+make launchd-remove
+```
+
 ## License
 
 This project is licensed on the [MIT License](LICENSE).

@@ -9,7 +9,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define VERSION "0.1.2"
+#define VERSION "0.2.0"
 
 #define clamp(x, min, max) ((x) < (min) ? (min) : ((x) > (max) ? (max) : (x)))
 

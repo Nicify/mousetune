@@ -1,7 +1,7 @@
 CC = clang
 CFLAGS = -fmodules -O3
 
-VERSION = 0.1.2
+VERSION = 0.2.0
 DESTDIR =
 prefix = /usr/local
 bindir = $(prefix)/bin
@@ -33,8 +33,18 @@ install: build
 uninstall:
 	$(RM) $(DESTDIR)$(bindir)/mset
 
+# add launch service
+add-launchd:
+	cp mset.plist ~/Library/LaunchAgents/com.relicx-me.mset.plist
+	launchctl load ~/Library/LaunchAgents/com.relicx-me.mset.plist
+
+# remove launch service
+remove-launchd:
+	launchctl unload ~/Library/LaunchAgents/com.relicx-me.mset.plist
+	$(RM) ~/Library/LaunchAgents/com.relicx-me.mset.plist
+
 release: clean build test
-	zip -r mset-$(VERSION)-universal.zip mset LICENSE README.md
+	zip -r mset-$(VERSION)-universal.zip mset mset.plist LICENSE README.md
 
 test:
 	./mset

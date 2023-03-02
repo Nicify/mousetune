@@ -21,6 +21,7 @@ mousetune [-s <sensitivity>] [-a <acceleration>]
 mousetune                  # set sensitivity to 190 and disable acceleration
 mousetune -s 180           # set sensitivity to 180 and disable acceleration
 mousetune -s 100 -a 50000  # set sensitivity to 100 and acceleration to 50000
+mousetune -s 190 -a 0 -d   # set sensitivity to 190 and disable acceleration, run as daemon, program will not quit
 ```
 
 ## Build from source

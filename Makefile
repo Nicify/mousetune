@@ -35,7 +35,7 @@ uninstall:
 
 # add launch service
 launchd-add:
-	cp mousetune.plist ~/Library/LaunchAgents/com.relicx-me.mousetune.plist
+	cp launch-agent.plist ~/Library/LaunchAgents/com.relicx-me.mousetune.plist
 	launchctl load ~/Library/LaunchAgents/com.relicx-me.mousetune.plist
 
 # remove launch service

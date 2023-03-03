@@ -11,10 +11,10 @@ INSTALL_PROGRAM = $(INSTALL) -m 755
 all: build
 
 build_x86_64:
-	$(CC) $(CFLAGS) -arch x86_64 -o mousetune.x86_64 mousetune.c
+	$(CC) $(CFLAGS) -arch x86_64 -o mousetune.x86_64 main.c
 
 build_arm64:
-	$(CC) $(CFLAGS) -arch arm64 -o mousetune.arm64 mousetune.c
+	$(CC) $(CFLAGS) -arch arm64 -o mousetune.arm64 main.c
 
 build: build_x86_64 build_arm64
 	lipo -create -output mousetune mousetune.x86_64 mousetune.arm64

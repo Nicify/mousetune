@@ -25,6 +25,11 @@ typedef struct {
   bool has_invalid_args;
 } input_args;
 
+const uint32_t DEFAULT_SEN = 190;
+const uint32_t DEFAULT_ACC = 0;
+const uint32_t MAX_SEN = 199;
+const uint32_t MAX_ACC = 10000000;
+
 const CFStringRef K_POINTER_RES_KEY = CFSTR(kIOHIDPointerResolutionKey);
 const CFStringRef K_MOUSE_ACCEL_KEY = CFSTR(kIOHIDMouseAccelerationType);
 
@@ -33,7 +38,7 @@ uint32_t sen_to_res(uint32_t sen) {
 }
 
 uint32_t res_to_sen(uint32_t res) {
-  return clamp((2000 - (res / 65536)) / 10, 1, 199);
+  return clamp((2000 - (res / 65536)) / 10, 1, MAX_SEN);
 }
 
 static HIDMouseParameters get() {
@@ -68,8 +73,8 @@ static void print_usage(char *bin) {
   printf("mousetune version %s\n\n", VERSION);
   printf("Usage: %s [-s <sensitivity>] [-a <acceleration>]\n\n", bin);
   printf("Options:\n");
-  printf("-s\t\t\t - set mouse sensitivity, default is 190, range is 1-199\n");
-  printf("-a\t\t\t - set mouse acceleration, default is 0, range is 0-10000000, 0 means disable acceleration\n\n");
+  printf("-s\t\t\t - set mouse sensitivity, default is 190, range is 1-%d\n", MAX_SEN);
+  printf("-a\t\t\t - set mouse acceleration, default is 0, range is 0-%d, 0 means disable acceleration\n\n", MAX_ACC);
   printf("-d\t\t\t - run as daemon, will check and re-apply mouse settings if system settings are changed or affected by other programs\n");
   printf("-v\t\t\t - print version\n");
   printf("-h, --help\t\t - print this help\n\n");
@@ -103,14 +108,14 @@ static int print_meta(int argc, char **argv) {
 }
 
 static input_args parse_args(int argc, char **argv) {
-  input_args args = {190, 0, false, false};
+  input_args args = {DEFAULT_SEN, DEFAULT_ACC, false, false};
 
   for (int idx = 1; idx < argc; idx++) {
     char *key = argv[idx];
     char *val = argv[++idx];
     // clang-format off
-    strcmp(key, "-s") == 0 ? (args.sen = atoi(val), assert(args.sen >= 1 && args.sen <= 199)) :
-    strcmp(key, "-a") == 0 ? (args.acc = atoi(val), assert(args.acc >= 0 && args.acc <= 10000000)) :
+    strcmp(key, "-s") == 0 ? (args.sen = atoi(val), assert(args.sen >= 1 && args.sen <= MAX_SEN)) :
+    strcmp(key, "-a") == 0 ? (args.acc = atoi(val), assert(args.acc >= 0 && args.acc <= MAX_ACC)) :
     strcmp(key, "-d") == 0 ? args.daemon = true :
     (printf("Invalid argument: %s\n\n", key), print_usage(argv[0]), exit(1));
     // clang-format on

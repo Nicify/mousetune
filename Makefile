@@ -23,8 +23,8 @@ format:
 	clang-format -i *.c
 
 clean:
+	$(RM) mousetune-$(shell ./mousetune -v)-universal.zip
 	$(RM) mousetune
-	$(RM) mousetune-$(VERSION)-universal.zip
 
 install: build
 	$(INSTALL_PROGRAM) mousetune $(DESTDIR)$(bindir)/mousetune

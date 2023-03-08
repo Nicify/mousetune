@@ -4,8 +4,6 @@
 	<dict>
 		<key>Label</key>
 		<string>com.relicx-me.mousetune</string>
-		<key>Program</key>
-		<string>/usr/local/bin/mousetune</string>
 		<key>ProgramArguments</key>
 		<array>
 			<string>/usr/local/bin/mousetune</string>
@@ -15,6 +13,11 @@
 			<string>0</string>
 			<string>-d</string>
 		</array>
+		<key>KeepAlive</key>
+		<dict>
+			<key>Crashed</key>
+			<true/>
+		</dict>
 		<key>RunAtLoad</key>
 		<true/>
 	</dict>

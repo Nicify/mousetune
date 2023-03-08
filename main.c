@@ -80,15 +80,7 @@ static void print_usage(char *bin) {
   printf("%s -s 100 -a 50000\t # set sensitivity to 100 and acceleration to 50000\n", bin);
 }
 
-static int print_meta(int argc, char **argv) {
-  if (argc == 1) {
-    print_usage(argv[0]);
-    return 0;
-  }
-
-  char *bin = argv[0];
-  char *cmd = argv[1];
-
+static int print_meta(char *bin, char *cmd) {
   if (strcmp(cmd, "-v") == 0) {
     printf("%s\n", VERSION);
     return 0;
@@ -160,7 +152,9 @@ int main(int argc, char **argv) {
   }
 
   if (argc < 3) {
-    exit(print_meta(argc, argv));
+    char *bin = argv[0];
+    char *cmd = argv[1];
+    return print_meta(bin, cmd);
   }
 
   InputArgs args = parse_args(argc, argv);

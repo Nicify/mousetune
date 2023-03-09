@@ -43,7 +43,7 @@ launchd-remove:
 	$(RM) ~/Library/LaunchAgents/com.relicx-me.mousetune.plist
 
 release: build test
-	zip -r mousetune-$(shell ./mousetune -v)-universal.zip mousetune mousetune.plist LICENSE README.md
+	zip -r mousetune-$(shell ./mousetune -v)-universal.zip mousetune launch-agent.plist LICENSE README.md
 
 test:
 	./mousetune

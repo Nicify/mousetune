@@ -34,15 +34,13 @@ mousetune -s 190 -a 0 -d   # set sensitivity to 190 and disable acceleration, ru
 
 Dev dependencies:
 
+- llvm
 - clang
-- make
 
 Install dependencies:
 
 ```bash
 xcode-select --install
-
-brew install make
 ```
 
 ### Build

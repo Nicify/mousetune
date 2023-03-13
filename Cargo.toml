@@ -4,14 +4,13 @@ version = "0.0.1"
 authors = ["Eva1ent <let@ik.me>"]
 description = ""
 edition = "2021"
-rust-version = "1.68.0"
 
 homepage = ""
 repository = ""
 documentation = ""
 
 license = "MIT"
-keywords = ["notification", "masOS", "osx", "notify"]
+keywords = ["mouse", "mousetune", "hid", "macOS", "osx"]
 readme = "README.md"
 
 include = ["Cargo.toml", "build.rs", "c/*", "src/*.rs", "tests/*.rs"]

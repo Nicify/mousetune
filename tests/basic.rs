@@ -2,7 +2,7 @@ use mac_mousetune_sys::*;
 
 #[test]
 fn resolution() {
-    let val = 655360;
+    let val = 7864320;
 
     set_pointer_resolution(val);
 
@@ -13,7 +13,7 @@ fn resolution() {
 
 #[test]
 fn acceleration() {
-    let val = 1234;
+    let val = 0;
 
     set_mouse_acceleration(val);
 

@@ -55,3 +55,10 @@ dkms.conf
 /mousetune
 *.zip
 *.tar.gz
+
+# Rust
+target
+*.swp
+Cargo.lock
+
+.vscode

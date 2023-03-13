@@ -1,0 +1,25 @@
+[package]
+name = "mac-mousetune-sys"
+version = "0.0.1"
+authors = ["Eva1ent <let@ik.me>"]
+description = ""
+edition = "2021"
+rust-version = "1.68.0"
+
+homepage = ""
+repository = ""
+documentation = ""
+
+license = "MIT"
+keywords = ["notification", "masOS", "osx", "notify"]
+readme = "README.md"
+
+include = ["Cargo.toml", "build.rs", "c/*", "src/*.rs", "tests/*.rs"]
+
+build = "build.rs"
+
+[dependencies]
+libc = "0.2.140"
+
+[build-dependencies]
+cc = "1.0.79"
